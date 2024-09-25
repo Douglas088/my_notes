@@ -71,37 +71,33 @@ main .input-add-container .input #title {
     display: none;
 }
 
-main .input-add-container .input .bi-plus-square {
-    font-size: 20px;
+.bi {
     cursor: pointer;
 }
 
 .notes-container {
     display: grid;
-    grid-template-columns: 300px 300px 300px 300px ;
     justify-content: center;
+    grid-template-columns: auto auto auto auto;
 }
 
 .note {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
     height: 200px;
-    border: 1px solid #333333;
+    width: 250px;
     border-radius: 8px;
-    padding: 0.5rem;
     margin: 1rem;
+    padding: 1rem;
     word-break: break-all;
     overflow: auto;
+    background-color: rgb(194, 109, 109);
+    color: #fff;
 }
 
-.title-box {
+.note .box-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-}
-
-.bi {
-    cursor: pointer;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #fff;
 }

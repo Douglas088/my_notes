@@ -1,56 +1,131 @@
-const inputTitle = document.querySelector("#title");
-const inputDescription = document.querySelector("#description");
-const btnAdd = document.querySelector("#btn-add");
-const notesContainer = document.querySelector(".notes-container");
+const inputDescription = document.querySelector("#description")
+const inputTitle = document.querySelector("#title")
+const btnAdd = document.querySelector(".bi-plus-square")
+const notesContainer = document.querySelector(".notes-container")
 
-//eventos
-
-inputDescription.addEventListener("click", function showInputTitle() {
-  inputTitle.style.display = "block";
-});
+inputDescription.addEventListener("click", () => {
+  inputTitle.style.display = "block"
+})
 
 btnAdd.addEventListener("click", () => {
-  addNote();
-  inputTitle.style.display = "none";
-  inputTitle = ""
-  inputDescription.value = ""
-});
+  if (btnAdd.getAttribute("data-editing-id")) {
+    updateNote()
+  } else {
+    addNote()
+  }
+  inputTitle.style.display = "none"
+})
 
-//funções
+const notes = []
 
 function addNote() {
-  noteObject = {
-    id: generationId(),
-    title: inputTitle.value,
-    description: inputDescription.value,
-    fixed: false,
-  };
+  if (inputTitle.value !== "" && inputDescription.value !== "") {
+    const noteObject = {
+      id: generationId(),
+      title: inputTitle.value,
+      description: inputDescription.value,
+      isPinned: false,
+    }
 
-  const noteElement = createNote(
-    noteObject.id,
-    noteObject.title,
-    noteObject.description
-  );
+    notes.push(noteObject)
+    inputTitle.value = ""
+    inputDescription.value = ""
+    renderNotes()
+  }
 }
 
 function generationId() {
-  return Math.floor(Math.random() * 5000);
+  return Math.floor(Math.random() * 5000)
 }
 
-function createNote(id, title, description, fixed) {
-  cardNote = document.createElement("div");
+function renderNotes() {
+  notesContainer.innerHTML = ""
 
-  cardNote.innerHTML = `
-        <div class="note">
-            <div class="title-box">
-                <h4>${title}</h4>
-                <i class="bi bi-pin-angle"></i>
-                <i class="bi bi-pencil-square"></i>
-                <i class="bi bi-trash3"></i>
-            </div>
-            <p>${description}</p>  
-        </div>    
-    `;
+  const pinnedNotes = notes.filter(note => note.isPinned)
+  const unPinnedNotes = notes.filter(note => !note.isPinned)
+  const allNotes = [...pinnedNotes, ...unPinnedNotes]
 
-  notesContainer.appendChild(cardNote);
+  allNotes.forEach(note => {
+    const noteElement = document.createElement("div")
+    noteElement.classList.add("note")
+
+    noteElement.innerHTML = `
+      <div class="box-title">
+        <h3>${note.title}</h3>
+        <div>
+          <i class="bi bi-pin-angle-fill" data-id="${note.id}" style="color: ${note.isPinned ? 'gold' : 'black'}"></i>
+          <i class="bi bi-pencil-square" data-id="${note.id}"></i>
+          <i class="bi bi-trash" data-id="${note.id}"></i>
+        </div>
+      </div>
+      <p>${note.description}</p>
+    `
+
+    notesContainer.appendChild(noteElement)
+  })
+
+  document.querySelectorAll('.bi-trash').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const noteId = e.target.getAttribute("data-id")
+      removeNote(noteId)
+    })
+  })
+
+  document.querySelectorAll(".bi-pin-angle-fill").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const noteId = e.target.getAttribute("data-id")
+      togglePin(noteId)
+    })
+  })
+
+  document.querySelectorAll(".bi-pencil-square").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const noteId = e.target.getAttribute("data-id")
+      loadNoteToEdit(noteId)
+    })
+  })
+}
+
+function removeNote(id) {
+  const noteIndex = notes.findIndex(note => note.id == id)
+  if (noteIndex !== -1) {
+    notes.splice(noteIndex, 1)
+    renderNotes()
+  }
+}
+
+function togglePin(id) {
+  const noteIndex = notes.findIndex(note => note.id == id)
+  if (noteIndex !== -1) {
+    notes[noteIndex].isPinned = !notes[noteIndex].isPinned
+    renderNotes()
+  }
+}
+
+function loadNoteToEdit(id) {
+  const note = notes.find(note => note.id == id)
+  if (note) {
+    inputTitle.value = note.title
+    inputDescription.value = note.description
+    btnAdd.setAttribute("data-editing-id", id)
+    inputTitle.style.display = "block"
+  }
+}
+
+function updateNote() {
+  const noteId = btnAdd.getAttribute("data-editing-id")
+  const noteIndex = notes.findIndex(note => note.id == noteId)
+
+  if (noteIndex !== -1) {
+    notes[noteIndex].title = inputTitle.value
+    notes[noteIndex].description = inputDescription.value
+    btnAdd.removeAttribute("data-editing-id")
+    clearInput()
+    renderNotes()
+  }
+}
+
+function clearInput() {
+  inputTitle.value = ""
+  inputDescription.value = ""
 }
